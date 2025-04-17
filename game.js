@@ -1,7 +1,8 @@
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    // 修改为适应手机屏幕的尺寸，这里以常见的手机屏幕宽度为例
+    width: window.innerWidth,
+    height: window.innerHeight,
     physics: {
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
@@ -34,13 +35,14 @@ function preload() {
 function create() {
     // 记录游戏开始时间
     startTime = this.time.now;
-    this.add.image(400, 300, 'background');
+    // 根据屏幕尺寸调整背景图片位置
+    this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'background');
     // 初始化气球组
     balloons = this.physics.add.group();
 
-    // 显示得分和倒计时
-    scoreText = this.add.text(16, 16, '得分: 0', { fontSize: '32px', fill: '#000' });
-    timerText = this.add.text(600, 16, '时间: 30', { fontSize: '32px', fill: '#000' });
+    // 显示得分和倒计时，调整文字位置和大小以适应手机屏幕
+    scoreText = this.add.text(10, 10, '得分: 0', { fontSize: '20px', fill: '#000' });
+    timerText = this.add.text(this.cameras.main.width - 100, 10, '时间: 30', { fontSize: '20px', fill: '#000' });
 
     // 点击气球事件
     this.input.on('gameobjectdown', (pointer, gameObject) => {
@@ -90,10 +92,12 @@ function spawnBalloons(scene) {
     const elapsedTime = scene.time.now - startTime;
     const balloonCount = Math.floor(elapsedTime / 5000) + 1; // 每5秒增加一个气球
     for (let i = 0; i < balloonCount; i++) {
-        let x = Phaser.Math.Between(50, 750);
-        let balloon = balloons.create(x, 600, 'balloon');
+        // 根据屏幕宽度调整气球生成的随机位置
+        let x = Phaser.Math.Between(20, scene.cameras.main.width - 20);
+        let balloon = balloons.create(x, scene.cameras.main.height, 'balloon');
         balloon.setInteractive();
-        balloon.setScale(0.5);
+        // 可以根据需要调整气球的缩放比例以适应手机屏幕
+        balloon.setScale(0.3);
         scene.physics.add.existing(balloon);
         balloon.body.setVelocityY(BASE_SPEED * speedMultiplier); // 动态速度
     }
@@ -120,10 +124,11 @@ function endGame(scene, isWin) {
     balloons.clear(true, true); // 清除所有气球
 
     const resultText = scene.add.text(
-        400, 300,
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY,
         isWin ? '抢到啦！' : '你没票！',
         {
-            fontSize: '64px',
+            fontSize: '40px',
             fill: isWin ? '#00ff00' : '#ff0000'
         }
     );
